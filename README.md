@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Habit Tracker PWA
 
-## Getting Started
+A mobile-first Progressive Web App for tracking daily habits with authentication, streak tracking, and offline support.
 
-First, run the development server:
+---
+
+##  Features
+
+- User signup & login (local auth)
+- Create, edit, delete habits
+- Toggle daily completion
+- Streak tracking logic
+- Persistent storage using localStorage
+- Splash screen + protected routes
+- Installable PWA with offline support
+
+---
+
+##  Tech Stack
+
+- Next.js (App Router)
+- React + TypeScript
+- Tailwind CSS
+- localStorage (persistence)
+- Vitest (unit + integration tests)
+- Playwright (E2E tests)
+
+---
+
+## Project Setup
+
+### 1. Install dependencies
 
 ```bash
+npm install
+
+## development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## App runs on: 
+http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Unit tests
+npm run test:unit
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Integration tests
+npm run test:integration
 
-## Learn More
+##E2E tests
+npm run test:e2e
 
-To learn more about Next.js, take a look at the following resources:
+## All tests
+npm test
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Local Storage Structure: The app uses browser localStorage only:
+habit-tracker-users
+{
+  id: string;
+  email: string;
+  password: string;
+  createdAt: string;
+}
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Session
+habit-tracker-session
 
-## Deploy on Vercel
+{
+  userId: string;
+  email: string;
+}
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Habits
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+habit-tracker-habits
+
+{
+  id: string;
+  userId: string;
+  name: string;
+  description: string;
+  frequency: "daily";
+  createdAt: string;
+  completions: string[];
+}
+
+Auth Flow
+Signup creates user + session
+Login validates credentials
+Session stored in localStorage
+Protected routes redirect if unauthenticated
+

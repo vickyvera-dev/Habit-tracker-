@@ -1,0 +1,22 @@
+export function getItem<T>(key: string): T | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setItem<T>(key: string, value: T) {
+  if (typeof window === "undefined") return;
+
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+export function removeItem(key: string) {
+  if (typeof window === "undefined") return;
+
+  localStorage.removeItem(key);
+}
