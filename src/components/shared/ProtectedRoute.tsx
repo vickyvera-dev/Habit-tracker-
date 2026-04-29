@@ -9,14 +9,18 @@ export default function ProtectedRoute({
 }: {
   children: React.ReactNode;
 }) {
-  const { session } = useAuth();
+  const { session, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!session) {
+    if (!loading && !session) {
       router.replace("/login");
     }
-  }, [session, router]);
+  }, [session, loading, router]);
+
+  if (loading) {
+    return null; // or splash loader
+  }
 
   if (!session) return null;
 
