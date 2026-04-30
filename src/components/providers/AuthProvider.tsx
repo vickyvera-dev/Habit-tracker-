@@ -53,8 +53,8 @@ export default function AuthProvider({
     window.location.href = "/login";
   };
 
-  // 🔥 GLOBAL LOADER HERE
-  if (loading) return <SplashScreen />;
+  // GLOBAL LOADER HERE
+  if (loading) return null;
 
   return (
     <AuthContext.Provider value={{ session, loading, logout }}>

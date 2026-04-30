@@ -15,11 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 
-export const metadata: Metadata = {
+ export const metadata: Metadata = {
   title: "Habit Tracker",
   description: "Habit Tracker PWA",
   manifest: "/manifest.json",
-};
+ };
+
 
 export default function RootLayout({
   children,
