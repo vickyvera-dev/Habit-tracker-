@@ -89,3 +89,11 @@ Login validates credentials
 Session stored in localStorage
 Protected routes redirect if unauthenticated
 
+## how users will install it
+##on Android (chrome)
+Tap "Add to Home Screen"
+## on Desktop(chrome/Edge)
+look for install icon in address bar
+
+##On iPhone (Safari)
+Tap share "Add to Home screen"
