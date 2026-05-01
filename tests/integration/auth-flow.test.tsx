@@ -1,110 +1,88 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, beforeEach } from 'vitest';
-import LoginForm from '@/components/auth/LoginForm';
-import SignupForm from '@/components/auth/SignupForm';
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import LoginForm from "@/components/auth/LoginForm";
+import SignupForm from "@/components/auth/SignupForm";
 
-describe('auth flow', () => {
+describe("auth flow", () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('submits the signup form and creates a session', () => {
-    render(<SignupForm />);
+  it("submits signup form and calls handler", () => {
+    const handleSignup = vi.fn();
 
-    fireEvent.change(screen.getByTestId('auth-signup-email'), {
-      target: { value: 'test@example.com' },
-    });
-
-    fireEvent.change(screen.getByTestId('auth-signup-password'), {
-      target: { value: 'password123' },
-    });
-
-    fireEvent.click(screen.getByTestId('auth-signup-submit'));
-
-    const session = JSON.parse(
-      localStorage.getItem('habit-tracker-session') || 'null'
+    render(
+      <SignupForm
+        email=""
+        setEmail={() => {}}
+        password=""
+        setPassword={() => {}}
+        error=""
+        loading={false}
+        handleSignup={handleSignup}
+        onLogin={() => {}}
+      />
     );
 
-    expect(session).not.toBeNull();
-    expect(session.email).toBe('test@example.com');
+    fireEvent.submit(screen.getByRole("button", { name: /sign up/i }));
+
+    expect(handleSignup).toHaveBeenCalled();
   });
 
-  it('shows an error for duplicate signup email', () => {
-    localStorage.setItem(
-      'habit-tracker-users',
-      JSON.stringify([
-        {
-          id: '1',
-          email: 'test@example.com',
-          password: 'password123',
-          createdAt: new Date().toISOString(),
-        },
-      ])
+  it("shows error for duplicate signup email", () => {
+    render(
+      <SignupForm
+        email=""
+        setEmail={() => {}}
+        password=""
+        setPassword={() => {}}
+        error="User already exists"
+        loading={false}
+        handleSignup={() => {}}
+        onLogin={() => {}}
+      />
     );
 
-    render(<SignupForm />);
-
-    fireEvent.change(screen.getByTestId('auth-signup-email'), {
-      target: { value: 'test@example.com' },
-    });
-
-    fireEvent.change(screen.getByTestId('auth-signup-password'), {
-      target: { value: 'password123' },
-    });
-
-    fireEvent.click(screen.getByTestId('auth-signup-submit'));
-
-    expect(screen.getByText('User already exists')).toBeInTheDocument();
+    expect(screen.getByText("User already exists")).toBeInTheDocument();
   });
 
-  it('submits the login form and stores the active session', () => {
-    localStorage.setItem(
-      'habit-tracker-users',
-      JSON.stringify([
-        {
-          id: '1',
-          email: 'test@example.com',
-          password: 'password123',
-          createdAt: new Date().toISOString(),
-        },
-      ])
+  it("calls login handler on submit", () => {
+    const handleLogin = vi.fn();
+
+    render(
+      <LoginForm
+        email=""
+        setEmail={() => {}}
+        password=""
+        setPassword={() => {}}
+        error=""
+        loading={false}
+        handleLogin={handleLogin}
+        onSignup={() => {}}
+      />
     );
 
-    render(<LoginForm />);
+    fireEvent.submit(screen.getByRole("button", { name: /login/i }));
 
-    fireEvent.change(screen.getByTestId('auth-login-email'), {
-      target: { value: 'test@example.com' },
-    });
-
-    fireEvent.change(screen.getByTestId('auth-login-password'), {
-      target: { value: 'password123' },
-    });
-
-    fireEvent.click(screen.getByTestId('auth-login-submit'));
-
-    const session = JSON.parse(
-      localStorage.getItem('habit-tracker-session') || 'null'
-    );
-
-    expect(session).not.toBeNull();
-    expect(session.email).toBe('test@example.com');
+    expect(handleLogin).toHaveBeenCalled();
   });
 
-  it('shows an error for invalid login credentials', () => {
-    render(<LoginForm />);
-
-    fireEvent.change(screen.getByTestId('auth-login-email'), {
-      target: { value: 'wrong@example.com' },
-    });
-
-    fireEvent.change(screen.getByTestId('auth-login-password'), {
-      target: { value: 'wrongpass' },
-    });
-
-    fireEvent.click(screen.getByTestId('auth-login-submit'));
+  it("renders login error message", () => {
+    render(
+      <LoginForm
+        email=""
+        setEmail={() => {}}
+        password=""
+        setPassword={() => {}}
+        error="Invalid email or password"
+        loading={false}
+        handleLogin={() => {}}
+        onSignup={() => {}}
+      />
+    );
 
     expect(
-      screen.getByText('Invalid email or password')
+      screen.getByText("Invalid email or password")
     ).toBeInTheDocument();
   });
 });

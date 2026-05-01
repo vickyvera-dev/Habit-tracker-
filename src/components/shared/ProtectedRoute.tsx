@@ -16,11 +16,9 @@ export default function ProtectedRoute({
     if (!loading && !session) {
       router.replace("/login");
     }
-  }, [session, loading, router]);
+  }, [loading, session, router]);
 
-  if (loading) {
-    return null; // or splash loader
-  }
+  if (loading) return null;
 
   if (!session) return null;
 

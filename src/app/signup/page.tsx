@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
 import SignupForm from "@/components/auth/SignupForm";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
+import { useAuth } from "@/components/providers/AuthProvider";
 
 type User = {
   id: string;
@@ -11,127 +11,96 @@ type User = {
   password: string;
   createdAt: string;
 };
+
 export default function SignupPage() {
   const router = useRouter();
+  const { session, loading, setSession } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loadingBtn, setLoadingBtn] = useState(false);
 
-  //redirect if already authenticated
+  //  Use AuthProvider instead of localStorage
   useEffect(() => {
-    try {
-      const rawSession = 
-      localStorage.getItem('habit-tracker-session');
+    if (loading) return;
 
-       if (!rawSession) return;
-
-       const parsed = 
-       JSON.parse(rawSession);
-      if (
-  parsed &&
-  typeof parsed.userId === 'string' &&
-  parsed.userId.length > 0 &&
-  typeof parsed.email === 'string'
-) {
-  router.replace('/dashboard');
-}    
-    } catch {
-      //fail silently
+    if (session) {
+      router.replace("/dashboard");
     }
-  }, []);
- 
- const id =
-  typeof crypto !== "undefined" && crypto.randomUUID
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  
+  }, [session, loading, router]);
 
-  //handle signup
   const handleSignup = () => {
-  setError('');
-  setLoading(true);
+    if (loadingBtn) return;
 
-  const normalizedEmail = email.trim().toLowerCase();
-  const normalizedPassword = password.trim();
+    setError("");
+    setLoadingBtn(true);
 
-  if (!normalizedEmail || !normalizedPassword) {
-    setError('Email and password are required');
-    setLoading(false);
-    return;
-  }
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPassword = password.trim();
 
-  try {
-    const rawUsers = localStorage.getItem('habit-tracker-users');
+    if (!normalizedEmail || !normalizedPassword) {
+      setError("Email and password are required");
+      setLoadingBtn(false);
+      return;
+    }
 
-    let users: User[] = [];
+    try {
+      const rawUsers = localStorage.getItem("habit-tracker-users");
 
-    if (rawUsers) {
-      let parsed;
-      try {
-      parsed = JSON.parse(rawUsers);
+      let users: User[] = rawUsers ? JSON.parse(rawUsers) : [];
+
+      const existingUser = users.find(
+        (u) => u.email.toLowerCase() === normalizedEmail
+      );
+
+      if (existingUser) {
+        setError("User already exists");
+        setLoadingBtn(false);
+        return;
+      }
+
+      const newUser: User = {
+        id: crypto.randomUUID(),
+        email: normalizedEmail,
+        password: normalizedPassword,
+        createdAt: new Date().toISOString(),
+      };
+
+      const updatedUsers = [...users, newUser];
+
+      localStorage.setItem(
+        "habit-tracker-users",
+        JSON.stringify(updatedUsers)
+      );
+
+      // Use AuthProvider
+      setSession({
+        userId: newUser.id,
+        email: newUser.email,
+      });
+
+      router.replace("/dashboard");
     } catch {
-      setError('Invalid stored data');
-      setLoading(false);
-      return;
-}
-      users = parsed;
+      setError("Something went wrong");
+      setLoadingBtn(false);
     }
+  };
 
-    const existingUser = users.find(
-      (u) => u.email.toLowerCase() === normalizedEmail
-    );
+  if (loading) return null;
 
-    if (existingUser) {
-      setError('User already exists');
-      setLoading(false);
-      return;
-    }
-
-    const newUser: User = {
-      id: crypto.randomUUID(),
-      email: normalizedEmail,
-      password: normalizedPassword,
-      createdAt: new Date().toISOString(),
-    };
-
-    const updatedUsers = [...users, newUser];
-
-    localStorage.setItem(
-      'habit-tracker-users',
-      JSON.stringify(updatedUsers)
-    );
-
-    const session = {
-      userId: newUser.id,
-      email: newUser.email,
-    };
-
-    localStorage.setItem(
-      'habit-tracker-session',
-      JSON.stringify(session)
-    );
-
-    router.replace('/dashboard');
-  } catch {
-    setError('Something went wrong');
-    setLoading(false);
-  }
-};
-  
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-    <SignupForm
-      email={email}
-      setEmail={setEmail}
-      password={password}
-      setPassword={setPassword}
-      error={error}
-      loading={loading}
-      handleSignup={handleSignup}
-      onLogin={() => router.push("/login")}
-    />
-  </main>
-  )
+      <SignupForm
+        email={email}
+        setEmail={setEmail}
+        password={password}
+        setPassword={setPassword}
+        error={error}
+        loading={loadingBtn}
+        handleSignup={handleSignup}
+        onLogin={() => router.push("/login")}
+      />
+    </main>
+  );
 }

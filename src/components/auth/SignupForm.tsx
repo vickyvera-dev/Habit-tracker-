@@ -37,7 +37,8 @@ export default function SignupForm({
         </h2>
       </div>
 
-      <div className="flex flex-col items-center">
+      {/* Title */}
+      <div className="flex flex-col items-center text-center">
         <h1 className="text-2xl font-semibold text-gray-800">
           Create an account
         </h1>
@@ -51,7 +52,7 @@ export default function SignupForm({
         className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
-          handleSignup();
+          if (!loading) handleSignup();
         }}
       >
         {/* Email */}
@@ -62,14 +63,15 @@ export default function SignupForm({
 
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <BsEnvelope size={20} />
+              <BsEnvelope size={18} />
             </span>
 
             <input
               type="email"
               required
+              autoComplete="email"
               placeholder="Enter your email"
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -84,14 +86,15 @@ export default function SignupForm({
 
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <LuLockKeyhole size={20} />
+              <LuLockKeyhole size={18} />
             </span>
 
             <input
               type="password"
               required
+              autoComplete="new-password"
               placeholder="Enter your password"
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -109,7 +112,7 @@ export default function SignupForm({
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 rounded-lg text-white ${
+          className={`w-full py-2 rounded-lg text-white transition ${
             loading
               ? "bg-blue-400 cursor-not-allowed"
               : "bg-blue-500 hover:bg-blue-600"

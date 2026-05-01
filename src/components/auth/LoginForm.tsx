@@ -37,11 +37,12 @@ export default function LoginForm({
         </h1>
       </div>
 
-      <div className="flex flex-col justify-center items-center">
+      {/* Welcome */}
+      <div className="flex flex-col justify-center items-center text-center">
         <h1 className="text-2xl font-semibold text-gray-800">
           Welcome Back
         </h1>
-        <p className="text-xs font-extralight text-gray-400">
+        <p className="text-xs font-light text-gray-400">
           Login to continue tracking your habits
         </p>
       </div>
@@ -51,7 +52,7 @@ export default function LoginForm({
         className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
-          handleLogin();
+          if (!loading) handleLogin();
         }}
       >
         {/* Email */}
@@ -62,14 +63,15 @@ export default function LoginForm({
 
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <BsEnvelope size={20} />
+              <BsEnvelope size={18} />
             </span>
 
             <input
               type="email"
               placeholder="Enter your email"
+              autoComplete="email"
               required
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -84,14 +86,15 @@ export default function LoginForm({
 
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <LuLockKeyhole size={20} />
+              <LuLockKeyhole size={18} />
             </span>
 
             <input
               type="password"
               placeholder="Enter your password"
+              autoComplete="current-password"
               required
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -121,7 +124,7 @@ export default function LoginForm({
 
       {/* Signup */}
       <p className="text-sm text-center text-gray-500">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <button
           type="button"
           className="text-blue-500 hover:underline"

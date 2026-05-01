@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import SplashScreen from "@/components/shared/SplashScreen";
 
 type Session = {
   userId: string;
@@ -11,12 +10,14 @@ type Session = {
 type AuthContextType = {
   session: Session | null;
   loading: boolean;
+  setSession: (session: Session | null) => void;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
+  setSession: () => {},
   logout: () => {},
 });
 
@@ -27,7 +28,7 @@ export default function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSessionState] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,28 +37,43 @@ export default function AuthProvider({
 
       if (raw) {
         const parsed = JSON.parse(raw);
+
         if (parsed?.userId && parsed?.email) {
-          setSession(parsed);
+          setSessionState(parsed);
+        } else {
+          setSessionState(null);
         }
+      } else {
+        setSessionState(null);
       }
     } catch {
-      // ignore
+      setSessionState(null);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const logout = () => {
-    localStorage.removeItem("habit-tracker-session");
-    setSession(null);
-    window.location.href = "/login";
+  const setSession = (session: Session | null) => {
+    if (session) {
+      localStorage.setItem(
+        "habit-tracker-session",
+        JSON.stringify(session)
+      );
+    } else {
+      localStorage.removeItem("habit-tracker-session");
+    }
+
+    setSessionState(session);
   };
 
-  // GLOBAL LOADER HERE
-  if (loading) return null;
+  const logout = () => {
+    setSession(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ session, loading, logout }}>
+    <AuthContext.Provider
+      value={{ session, loading, setSession, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

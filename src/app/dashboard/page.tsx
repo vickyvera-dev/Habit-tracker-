@@ -4,14 +4,8 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import ProtectedRoute from "@/components/shared/ProtectedRoute";
 import HabitForm from "@/components/habits/HabitForm";
 import HabitList from "@/components/habits/HabitList";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BsBoxArrowRight } from "react-icons/bs";
-
-type Session = {
-  userId: string;
-  email: string;
-};
 
 type Habit = {
   id: string;
@@ -24,9 +18,8 @@ type Habit = {
 };
 
 export default function DashboardPage() {
-  const router = useRouter();
+  const { session, logout } = useAuth(); // single source of truth
 
-  const [session, setSession] = useState<Session | null>(null);
   const [habits, setHabits] = useState<Habit[]>([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -35,34 +28,29 @@ export default function DashboardPage() {
   const [editDescription, setEditDescription] = useState("");
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
-  //  ONLY load data (ProtectedRoute handles auth now)
- useEffect(() => {
-  const rawSession = localStorage.getItem("habit-tracker-session");
-  if (!rawSession) return;
+  //  Load habits ONLY when session is ready
+  useEffect(() => {
+    if (!session) return;
 
-  const parsed: Session = JSON.parse(rawSession);
-  setSession(parsed);
+    const rawHabits = localStorage.getItem("habit-tracker-habits");
 
-  const rawHabits = localStorage.getItem("habit-tracker-habits");
+    let allHabits: Habit[] = [];
 
-  let allHabits: Habit[] = [];
-
-  if (rawHabits) {
-    try {
-      allHabits = JSON.parse(rawHabits);
-    } catch {
-      allHabits = [];
+    if (rawHabits) {
+      try {
+        allHabits = JSON.parse(rawHabits);
+      } catch {
+        allHabits = [];
+      }
     }
-  }
 
-  const userHabits = allHabits.filter(
-    (h) => h.userId === parsed.userId
-  );
+    const userHabits = allHabits.filter(
+      (h) => h.userId === session.userId
+    );
 
-  setHabits(userHabits);
-}, []);
+    setHabits(userHabits);
+  }, [session]);
 
-  // Save habits
   const saveHabits = (updatedUserHabits: Habit[]) => {
     const raw = localStorage.getItem("habit-tracker-habits");
 
@@ -131,11 +119,11 @@ export default function DashboardPage() {
   };
 
   const saveEdit = (id: string) => {
-  editHabit(id, editName, editDescription);
-  setEditingId(null);
-  setEditName("");
-  setEditDescription("");
-};
+    editHabit(id, editName, editDescription);
+    setEditingId(null);
+    setEditName("");
+    setEditDescription("");
+  };
 
   const getToday = () => {
     const d = new Date();
@@ -191,23 +179,16 @@ export default function DashboardPage() {
     saveHabits(updated);
   };
 
-  const logout = () => {
-  localStorage.removeItem("habit-tracker-session");
-  setSession(null);
-  router.replace("/login");
-};
-
   return (
     <ProtectedRoute>
       <main className="min-h-screen p-4 space-y-6">
-        {/* Header */}
         <header className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-600">
             Dashboard
           </h1>
 
           <button
-            onClick={logout}
+            onClick={logout} // unified logout
             className="px-4 py-2 flex gap-2 items-center bg-red-500 text-white rounded-lg"
           >
             <BsBoxArrowRight size={20} />
@@ -215,7 +196,6 @@ export default function DashboardPage() {
           </button>
         </header>
 
-        {/* Form */}
         <HabitForm
           name={name}
           setName={setName}
@@ -224,7 +204,6 @@ export default function DashboardPage() {
           addHabit={addHabit}
         />
 
-        {/* List */}
         <HabitList
           habits={habits}
           getStreak={getStreak}
